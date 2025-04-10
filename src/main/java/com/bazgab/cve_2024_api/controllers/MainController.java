@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
-import java.util.List;
+
 import java.util.Optional;
+import java.util.List;
 
 
 @RestController
@@ -35,19 +38,22 @@ public class MainController {
         }
     }
 
-//    @GetMapping("/findCveByAffected_OS/{affected_os}")
-//    public ResponseEntity<CveModel> findCveByAffected_OS(@PathVariable String affected_os) {
-//        List<CveModel> cveModelList =  cveRepository.findAll();
-//        try {
-//            if (cveModelList.isEmpty()) {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            } else {
-//                 return new ResponseEntity<>(cveModelList.addAll(cveModelList::add), HttpStatus.OK);
-//            }
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+    @GetMapping("/findCveByAffectedOs/{os_type}")
+    public ResponseEntity<List<CveModel>> findCveByAffectedOs(@PathVariable String os_type) {
+        List<CveModel> results = switch (os_type) {
+            case "Windows" -> cveRepository.findCveByAffected_OS("windows");
+            case "Ubuntu" -> cveRepository.findCveByAffected_OS("ubuntu");
+            case "Fedora" -> cveRepository.findCveByAffected_OS("fedora");
+            case "RedHat" -> cveRepository.findCveByAffected_OS("redhat");
+            case "Qualcomm" -> cveRepository.findCveByAffected_OS("qualcomm");
+            case "MacOs" -> cveRepository.findCveByAffected_OS("macos");
+            case "IphoneOS" -> cveRepository.findCveByAffected_OS("iphone");
+            case "Android" -> cveRepository.findCveByAffected_OS("android");
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Operating System");
+        };
+
+        return ResponseEntity.ok(results);
+    }
 
 
 
